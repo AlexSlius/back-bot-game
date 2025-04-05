@@ -1,0 +1,17 @@
+// statuses
+
+model Status {
+    id    Int    @id @default(autoincrement())
+    name  String @unique
+    color String
+
+    citys City[]
+    teams Team[]
+    user  User[]
+    games Game[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("statuses")
+}

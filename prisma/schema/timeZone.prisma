@@ -1,0 +1,11 @@
+// time zones
+
+model TimeZone {
+    id   Int    @id @default(autoincrement())
+    name String @unique
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("timeZones")
+}

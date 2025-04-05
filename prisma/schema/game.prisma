@@ -1,0 +1,25 @@
+// games
+
+model Game {
+    id    Int     @id @default(autoincrement())
+    name  String
+    image String?
+
+    cityId Int
+    city   City @relation(fields: [cityId], references: [id])
+
+    statusId Int    @default(1)
+    status   Status @relation(fields: [statusId], references: [id])
+
+    places            Int
+    beginningDateTime DateTime
+    description       String?  @db.VarChar(4096)
+
+    teams        Team[]
+    reservations Reservation[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("games")
+}

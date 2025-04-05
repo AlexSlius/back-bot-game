@@ -1,0 +1,13 @@
+// auths
+
+model Auth {
+    id    Int    @id @default(autoincrement())
+    token String
+
+    user User [] @relation("UserAuth")
+
+    reatedAt  DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("auths")
+}
