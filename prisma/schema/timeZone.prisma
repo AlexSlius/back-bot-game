@@ -1,8 +1,9 @@
 // time zones
 
 model TimeZone {
-    id   Int    @id @default(autoincrement())
-    name String @unique
+    id     Int    @id @default(autoincrement())
+    name   String @unique
+    nameUa String @default("")
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt

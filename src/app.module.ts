@@ -1,32 +1,24 @@
 import { Module } from '@nestjs/common';
-import { PrismaModule } from '../prisma/prisma.module';
-import { UserModule } from './modules-crm/user/user.module';
-import { TimeZoneModule } from './modules-crm/team/modules-crm/time-zone/time-zone.module';
-import { StatusModule } from './modules-crm/status/status.module';
-import { RoleModule } from './modules-crm/role/role.module';
-import { ReservationModule } from './modules-crm/reservation/reservation.module';
-import { QuestionModule } from './modules-crm/question/question.module';
-import { GameModule } from './modules-crm/game/game.module';
-import { CityModule } from './modules-crm/city/city.module';
-import { AuthModule } from './modules-crm/auth/auth.module';
+import { APP_FILTER } from '@nestjs/core';
 
+import { PrismaModule } from '../prisma/prisma.module';
+import { AdminModule } from './modules-admin/admin.module';
+import { BotModule } from './modules-bot/bot.module';
+import { AppController } from './app.controller';
+import { PrismaExceptionFilter } from './common/filters/prisma-graphql-exception.filter';
 
 @Module({
   imports: [
     PrismaModule,
-    UserModule,
-    TimeZoneModule,
-    StatusModule,
-    RoleModule,
-    ReservationModule,
-    QuestionModule,
-    GameModule,
-    CityModule,
-    AuthModule
+    AdminModule,
+    BotModule,
   ],
-  controllers: [],
-  providers: [],
+  controllers: [AppController],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: PrismaExceptionFilter,
+    },
+  ],
 })
-
-
 export class AppModule { }
