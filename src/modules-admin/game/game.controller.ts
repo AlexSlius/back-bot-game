@@ -1,11 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Query } from '@nestjs/common';
 import { GameService } from './game.service';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 
 @Controller()
 export class GameController {
-  constructor(private readonly gameService: GameService) {}
+  constructor(private readonly gameService: GameService) { }
 
   @Post()
   create(@Body() createGameDto: CreateGameDto) {
@@ -13,8 +13,20 @@ export class GameController {
   }
 
   @Get()
-  findAll() {
-    return this.gameService.findAll();
+  findAll(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 20,
+    @Query('sities') sities: number[] = [],
+    @Query('statuses') statuses: number[] = [],
+    @Query('search') search: string = '',
+  ) {
+    return this.gameService.findAll({
+      page: +page,
+      limit: +limit,
+      sities,
+      statuses,
+      search
+    });
   }
 
   @Get(':id')
@@ -25,10 +37,5 @@ export class GameController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateGameDto: UpdateGameDto) {
     return this.gameService.update(+id, updateGameDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.gameService.remove(+id);
   }
 }

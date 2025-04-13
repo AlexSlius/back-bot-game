@@ -5,6 +5,8 @@ model TimeZone {
     name   String @unique
     nameUa String @default("")
 
+    city City[]
+
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 

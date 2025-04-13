@@ -1,12 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+
 import { PrismaService } from 'prisma/prisma.service';
 
 
 @Injectable()
 export class CustomJwtStrategy extends PassportStrategy(Strategy) {
-    constructor(private prisma: PrismaService) {
+    constructor(
+        private prisma: PrismaService,
+    ) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             secretOrKey: process.env.JWT_SECRET,
@@ -22,12 +25,22 @@ export class CustomJwtStrategy extends PassportStrategy(Strategy) {
                 token: token
             },
             include: {
-                user: true
+                user: {}
             }
         });
 
-        if (!!record?.user[0]?.id)
-            return true;
+        if (!!record?.user[0]?.id) {
+            const { id, roleId, statusId } = record.user[0];
+
+            if (statusId !== 1) {
+                throw new UnauthorizedException("Доступ заборонено");
+            }
+
+            return {
+                id,
+                roleId
+            }
+        }
 
         return false;
     }

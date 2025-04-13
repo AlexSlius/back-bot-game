@@ -17,7 +17,7 @@ export class AuthController {
 
   @Public()
   @Post('logout')
-  logout(@Headers('authorization') authorization: string,) {
+  logout(@Headers('authorization') authorization: string) {
     return this.authService.logout(authorization);
   }
 }

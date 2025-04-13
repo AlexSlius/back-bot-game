@@ -5,7 +5,7 @@ model Team {
     name     String
     captain  String
     phone    String
-    chatId   BigInt
+    chatId   String?
     nickname String?
 
     gameId Int
@@ -22,6 +22,8 @@ model Team {
 
     wish String? @db.VarChar(1000)
     note String? @db.VarChar(1000)
+
+    isReservation Boolean @default(false)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt

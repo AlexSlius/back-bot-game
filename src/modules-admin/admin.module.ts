@@ -8,15 +8,16 @@ import { UserModule } from './user/user.module';
 import { TimeZoneModule } from './time-zone/time-zone.module';
 import { StatusModule } from './status/status.module';
 import { RoleModule } from './role/role.module';
-import { ReservationModule } from './reservation/reservation.module';
 import { QuestionModule } from './question/question.module';
 import { GameModule } from './game/game.module';
 import { CityModule } from './city/city.module';
 import { AuthModule } from './auth/auth.module';
+import { TeamModule } from './team/team.module';
 
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { CustomJwtStrategy } from 'src/common/strategy/custom-jwt-strategy';
 import { AdminController } from './admin.controller';
+
 
 @Module({
     imports: [
@@ -31,10 +32,10 @@ import { AdminController } from './admin.controller';
         TimeZoneModule,
         StatusModule,
         RoleModule,
-        ReservationModule,
         QuestionModule,
         GameModule,
         CityModule,
+        TeamModule,
         RouterModule.register([
             {
                 path: 'admin',
@@ -52,16 +53,16 @@ import { AdminController } from './admin.controller';
                         module: TimeZoneModule,
                     },
                     {
+                        path: 'teams',
+                        module: TeamModule,
+                    },
+                    {
                         path: 'statuses',
                         module: StatusModule,
                     },
                     {
                         path: 'roles',
                         module: RoleModule,
-                    },
-                    {
-                        path: 'reservations',
-                        module: ReservationModule,
                     },
                     {
                         path: 'questions',
@@ -72,7 +73,7 @@ import { AdminController } from './admin.controller';
                         module: GameModule,
                     },
                     {
-                        path: 'citys',
+                        path: 'cities',
                         module: CityModule,
                     },
                 ],

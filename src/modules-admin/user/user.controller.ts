@@ -1,5 +1,7 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, UseGuards, Headers, Query } from '@nestjs/common';
 import { UserService } from './user.service';
+import { RoleModeratorGuard } from 'src/common/guards/role-moderator';
+
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -7,14 +9,24 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UserController {
   constructor(private readonly userService: UserService) { }
 
+  @UseGuards(RoleModeratorGuard)
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
 
+  @UseGuards(RoleModeratorGuard)
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  findAll(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 20,
+  ) {
+    return this.userService.findAll({page: +page, limit: +limit});
+  }
+
+  @Get('token')
+  findCurrent(@Headers('authorization') authorization: string) {
+    return this.userService.findCurrent(authorization);
   }
 
   @Get(':id')
@@ -22,13 +34,9 @@ export class UserController {
     return this.userService.findOne(+id);
   }
 
+  @UseGuards(RoleModeratorGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
   }
 }

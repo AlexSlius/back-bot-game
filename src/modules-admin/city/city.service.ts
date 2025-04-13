@@ -1,26 +1,101 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'prisma/prisma.service';
+
 import { CreateCityDto } from './dto/create-city.dto';
 import { UpdateCityDto } from './dto/update-city.dto';
 
 @Injectable()
 export class CityService {
-  create(createCityDto: CreateCityDto) {
-    return 'This action adds a new city';
+  constructor(private readonly prisma: PrismaService) { }
+
+  async create(createCityDto: CreateCityDto) {
+    const res = await this.prisma.city.create({
+      data: {
+        name: createCityDto.name,
+        tineZone: {
+          connect: { id: createCityDto.timeZoneId, }
+        },
+        status: {
+          connect: { id: createCityDto.statusId ?? 1 }
+        }
+      }
+    });
+
+    return {
+      data: {
+        isAdd: !!res?.id
+      }
+    }
   }
 
-  findAll() {
-    return `This action returns all city`;
+  async findAll({ page, limit }: { page: number, limit: number }) {
+    const skip = (page - 1) * limit;
+
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.city.findMany({
+        include: {
+          status: true,
+          tineZone: true
+        },
+        skip,
+        take: limit,
+        orderBy: { id: 'desc' },
+      }),
+
+      this.prisma.city.count(),
+    ]);
+
+    return {
+      data: items,
+      total,
+      page,
+      lastPage: Math.ceil(total / limit),
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} city`;
+  async findOne(id: number) {
+    const city = await this.prisma.city.findUnique({
+      where: {
+        id
+      },
+      include: {
+        status: true,
+        tineZone: true
+      }
+    })
+
+    if (!city)
+      return {
+        data: null
+      }
+
+    return {
+      data: city
+    };
   }
 
-  update(id: number, updateCityDto: UpdateCityDto) {
-    return `This action updates a #${id} city`;
-  }
+  async update(id: number, updateCityDto: UpdateCityDto) {
+    const res = await this.prisma.city.update({
+      where: {
+        id,
+      },
+      data: {
+        name: updateCityDto.name,
+        tineZone: updateCityDto.timeZoneId ? {
+          connect: { id: updateCityDto.timeZoneId }
+        } : undefined,
+        status: updateCityDto.statusId ? {
+          connect: { id: updateCityDto.statusId }
+        } : {
+          connect: { id: 1 },
+        },
+      },
+    });
 
-  remove(id: number) {
-    return `This action removes a #${id} city`;
+    return {
+      data: {
+        isUpdate: !!res?.id
+      }
+    }
   }
 }

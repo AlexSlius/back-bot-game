@@ -26,7 +26,7 @@ export class AuthService {
       }
     });
 
-    if (!user)
+    if (!user || user?.status?.id !== 1)
       throw new NotFoundException([ua.errorLogin]);
 
     const isTheSame = await this.passwordServis.comparePassword(password, user.password);
