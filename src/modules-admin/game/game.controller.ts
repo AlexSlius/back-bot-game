@@ -19,13 +19,17 @@ export class GameController {
     @Query('sities') sities: number[] = [],
     @Query('statuses') statuses: number[] = [],
     @Query('search') search: string = '',
+    @Query('dateFrom') dateFrom: Date = undefined,
+    @Query('dateTo') dateTo: Date = undefined,
   ) {
     return this.gameService.findAll({
       page: +page,
       limit: +limit,
       sities,
       statuses,
-      search
+      search,
+      dateFrom,
+      dateTo,
     });
   }
 

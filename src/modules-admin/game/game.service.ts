@@ -50,13 +50,17 @@ export class GameService {
     limit,
     sities,
     statuses,
-    search
+    search,
+    dateFrom,
+    dateTo,
   }: {
     page: number;
     limit: number;
     sities: number[];
     statuses: number[];
     search: string;
+    dateFrom: Date
+    dateTo: Date
   }) {
     const skip = (page - 1) * limit;
 
@@ -77,6 +81,12 @@ export class GameService {
           mode: 'insensitive',
         },
       }),
+      ...(dateFrom || dateTo ? {
+        createdAt: {
+          ...(dateFrom && { gte: dateFrom }),
+          ...(dateTo && { lte: dateTo }),
+        }
+      } : {})
     };
 
     const [items, total] = await this.prisma.$transaction([
