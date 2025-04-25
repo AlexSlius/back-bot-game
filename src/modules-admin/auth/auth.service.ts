@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UseGuards } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { PasswordServis } from 'src/common/services/password.services';
@@ -27,12 +27,12 @@ export class AuthService {
     });
 
     if (!user || user?.status?.id !== 1)
-      throw new NotFoundException([ua.errorLogin]);
+      throw new UnauthorizedException([ua.errorLogin]);
 
     const isTheSame = await this.passwordServis.comparePassword(password, user.password);
 
     if (!isTheSame)
-      throw new NotFoundException([ua.errorLogin]);
+      throw new UnauthorizedException([ua.errorLogin]);
 
     const payload = { sub: user.id, role: user.roleId };
     const token = this.jwtService.sign(payload);
@@ -53,23 +53,33 @@ export class AuthService {
 
   async logout(authorization: string) {
     if (!authorization) {
-      throw new NotFoundException([ua.errorToken]);
+      throw new UnauthorizedException([ua.errorToken]);
     }
 
     const spliteToken: string[] = authorization.split(" ");
 
     if (spliteToken.length !== 2) {
-      throw new NotFoundException([ua.errorToken]);
+      throw new UnauthorizedException([ua.errorToken]);
     }
 
-    const res = await this.prisma.auth.delete({
-      where: {
-        token: spliteToken[1]
-      }
-    })
+    try {
+      const res = await this.prisma.auth.delete({
+        where: {
+          token: spliteToken[1]
+        }
+      })
 
-    return {
-      status: !!res?.id
-    };
+      return {
+        status: !!res?.id
+      };
+    } catch (error) {
+      if (error.code === 'P2025') {
+        return {
+          message: [ua.errorLogoutDelete]
+        }
+      } else {
+        throw error;
+      }
+    }
   }
 }

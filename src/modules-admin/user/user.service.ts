@@ -4,6 +4,9 @@ import { PrismaService } from 'prisma/prisma.service';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
+
+import ua from "../../translations/ua.json";
 
 @Injectable()
 export class UserService {
@@ -94,7 +97,7 @@ export class UserService {
     })
 
     return {
-      data: res?.user?.[0] || null
+      data: res?.user || null
     }
   }
 
@@ -120,7 +123,7 @@ export class UserService {
     }
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(authorization: string, id: number, updateUserDto: UpdateUserDto) {
     const { name, email, roleId, statusId, cityId, password } = updateUserDto;
 
     const user = await this.prisma.user.findUnique({
@@ -179,16 +182,75 @@ export class UserService {
           connect: { id: statusId },
         },
         city: {
-          connect: cityId.map((cityId: number) => ({ id: cityId })),
+          set: cityId.map((id: number) => ({ id })),
         },
         password: hashedPassword || user.password,
       },
     });
 
-    return {
-      data: {
-        isUpdate: !!updatedUser?.id
+    if (!!updatedUser?.id) {
+      if (password?.length) {
+        await this.removeAllTokensForUser(authorization, updatedUser.id);
+      }
+
+      return {
+        data: {
+          isUpdate: true
+        }
       }
     }
+  }
+
+  async updatePassword(authorization: string, id: number, data: UpdatePasswordDto) {
+    const res = await this.prisma.user.findUnique({
+      where: {
+        id
+      },
+    });
+
+    if (!res?.id) {
+      return {
+        message: [ua.recordDoesNotExist]
+      }
+    }
+
+    let hashedPassword = null;
+    if (data?.password) {
+      const saltRounds = Number(process.env.SALT_ROUNDS) || 10;
+      hashedPassword = await bcrypt.hash(data.password, saltRounds);
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        password: hashedPassword
+      },
+    });
+
+    if (!!updatedUser?.id) {
+      await this.removeAllTokensForUser(authorization, updatedUser.id);
+
+      return {
+        data: {
+          isUpdate: true,
+        }
+      }
+    }
+  }
+
+  // remove all tokens for user
+  async removeAllTokensForUser(authorization: string, id: number) {
+    const spliteToken: string[] = authorization.split(" ");
+
+    await this.prisma.auth.deleteMany({
+      where: {
+        userId: id,
+        NOT: {
+          token: spliteToken[1]
+        }
+      }
+    })
   }
 }

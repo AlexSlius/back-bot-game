@@ -4,6 +4,7 @@ import { RoleModeratorGuard } from 'src/common/guards/role-moderator';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Controller()
 export class UserController {
@@ -21,7 +22,7 @@ export class UserController {
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 20,
   ) {
-    return this.userService.findAll({page: +page, limit: +limit});
+    return this.userService.findAll({ page: +page, limit: +limit });
   }
 
   @Get('token')
@@ -36,7 +37,12 @@ export class UserController {
 
   @UseGuards(RoleModeratorGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  update(@Headers('authorization') authorization: string, @Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.update(authorization, +id, updateUserDto);
+  }
+
+  @Patch('update-password/:id')
+  updatePassword(@Headers('authorization') authorization: string, @Param('id') id: string, @Body() data: UpdatePasswordDto) {
+    return this.userService.updatePassword(authorization, +id, data);
   }
 }

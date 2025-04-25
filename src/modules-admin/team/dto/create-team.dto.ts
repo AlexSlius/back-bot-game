@@ -6,7 +6,7 @@ export class CreateTeamDto {
     name: string
 
     @IsString()
-    @IsNotEmpty({ message: 'Поле капіт не може бути порожнім!' })
+    @IsNotEmpty({ message: 'Поле капітан не може бути порожнім!' })
     captain: string
 
     @IsString()

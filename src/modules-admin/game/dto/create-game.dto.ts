@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsNotEmpty, IsBoolean, IsDateString } from 'class-validator';
+import { IsString, IsNumber, IsBoolean, IsDateString, IsOptional } from 'class-validator';
 
 export class CreateGameDto {
     @IsString()
@@ -16,6 +16,7 @@ export class CreateGameDto {
     @IsBoolean()
     isPlaces?: boolean
 
+    @IsOptional()
     @IsNumber()
     places?: number
 

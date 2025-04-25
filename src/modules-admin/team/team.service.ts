@@ -3,8 +3,10 @@ import { PrismaService } from 'prisma/prisma.service';
 import { Response } from 'express';
 import * as ExcelJS from 'exceljs';
 
+import { dataUtcToTimeZona } from 'src/common/helpers/date-utc-to-timezona';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
+
 
 @Injectable()
 export class TeamService {
@@ -26,6 +28,30 @@ export class TeamService {
       note = '',
     } = createUserDto;
 
+    const game = await this.prisma.game.findUnique({
+      where: {
+        id: gameId
+      },
+      include: {
+        teams: {
+          where: {
+            statusId: 1,
+          },
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    let status = statusId;
+
+    if (game.isPlaces) {
+      if (game.places <= game.teams.length) {
+        status = 6;
+      }
+    }
+
     const res = await this.prisma.team.create({
       data: {
         name,
@@ -42,12 +68,39 @@ export class TeamService {
         players,
         playersNew,
         status: {
-          connect: { id: statusId }
+          connect: { id: status }
         },
         wish,
         note
-      }
+      },
+      include: {
+        game: {
+          include: {
+            teams: {
+              where: {
+                statusId: 1,
+              },
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
+      },
     });
+
+    if (res.game.isPlaces && res.game.statusId != 3) {
+      if (res.game.places <= res.game.teams.length) {
+        await this.prisma.game.update({
+          where: {
+            id: res.game.id
+          },
+          data: {
+            statusId: 3
+          }
+        })
+      }
+    }
 
     return {
       data: {
@@ -57,34 +110,66 @@ export class TeamService {
   }
 
   async findAll({
+    authorization,
     page,
     limit,
     gamesId,
     teams,
     captains,
     phones,
-    citiesId,
-    statusesId,
+    cities,
+    statuses,
     dateFrom,
     dateTo,
   }: {
+    authorization: string;
     page: number;
     limit: number;
     gamesId: number[];
     teams: string[];
     captains: string[];
     phones: string[];
-    citiesId: number[];
-    statusesId: number[];
+    cities: number[];
+    statuses: number[];
     dateFrom: Date;
     dateTo: Date;
   }) {
     const skip = (page - 1) * limit;
+    const spliteToken: string[] = authorization.split(" ");
+
+    const resUser = await this.prisma.auth.findUnique({
+      where: {
+        token: spliteToken[1],
+      },
+      include: {
+        user: {
+          include: {
+            city: true
+          }
+        }
+      }
+    });
+
+    const userModer = resUser.user.roleId == 1;
+
+    let filterCity = [];
+
+    if (cities?.length) {
+      filterCity = cities;
+    } else {
+      if (userModer) {
+        filterCity = [];
+      }
+
+      if (!userModer) {
+        filterCity = resUser.user.city.map((el: { id: number }) => el.id);
+      }
+    }
 
     const where = {
-      ...(citiesId?.length && {
+      ...(filterCity?.length && {
         cityId: {
-          in: citiesId,
+          in: filterCity,
         },
       }),
       ...(gamesId?.length && {
@@ -97,9 +182,9 @@ export class TeamService {
           in: teams,
         },
       }),
-      ...(statusesId?.length && {
+      ...(statuses?.length && {
         statusId: {
-          in: statusesId,
+          in: statuses,
         },
       }),
       ...(phones?.length && {
@@ -125,7 +210,11 @@ export class TeamService {
         where,
         include: {
           game: true,
-          city: true,
+          city: {
+            include: {
+              tineZone: true
+            }
+          },
           status: true
         },
         skip,
@@ -133,11 +222,13 @@ export class TeamService {
         orderBy: { id: 'desc' },
       }),
 
-      this.prisma.team.count(),
+      this.prisma.team.count({
+        where
+      }),
     ]);
 
     return {
-      data: items,
+      data: items.map((el: any) => ({ ...el, createdAt: dataUtcToTimeZona(el.createdAt, el.city.tineZone.name) })),
       total,
       page,
       lastPage: Math.ceil(total / limit),
@@ -146,29 +237,62 @@ export class TeamService {
 
   async exportTeamsToExcel({
     res,
+    authorization,
     gamesId,
     teams,
     captains,
     phones,
-    citiesId,
-    statusesId,
+    cities,
+    statuses,
     dateFrom,
     dateTo,
   }: {
     res: Response;
+    authorization?: string;
     gamesId: number[];
     teams: string[];
     captains: string[];
     phones: string[];
-    citiesId: number[];
-    statusesId: number[];
+    cities: number[];
+    statuses: number[];
     dateFrom: Date;
     dateTo: Date;
   }) {
+    const spliteToken: string[] = authorization.split(" ");
+
+    const resUser = await this.prisma.auth.findUnique({
+      where: {
+        token: spliteToken[1],
+      },
+      include: {
+        user: {
+          include: {
+            city: true
+          }
+        }
+      }
+    });
+
+    const userModer = resUser.user.roleId == 1;
+
+    let filterCity = [];
+
+    if (cities?.length) {
+      filterCity = cities;
+    } else {
+      if (userModer) {
+        filterCity = [];
+      }
+
+      if (!userModer) {
+        filterCity = resUser.user.city.map((el: { id: number }) => el.id);
+      }
+    }
+
     const where = {
-      ...(citiesId?.length && {
+      ...(cities?.length && {
         cityId: {
-          in: citiesId,
+          in: cities,
         },
       }),
       ...(gamesId?.length && {
@@ -181,9 +305,9 @@ export class TeamService {
           in: teams,
         },
       }),
-      ...(statusesId?.length && {
+      ...(statuses?.length && {
         statusId: {
-          in: statusesId,
+          in: statuses,
         },
       }),
       ...(phones?.length && {
@@ -208,7 +332,11 @@ export class TeamService {
       where,
       include: {
         game: true,
-        city: true,
+        city: {
+          include: {
+            tineZone: true
+          }
+        },
         status: true
       },
       orderBy: { id: 'desc' },
@@ -239,11 +367,11 @@ export class TeamService {
     // Data
     resTeams.forEach(team => {
       worksheet.addRow({
-        id: team.id,
+        // id: team.id,
         name: team.name,
         captain: team.captain,
         phone: team.phone,
-        chatId: team.chatId || '',
+        // chatId: team.chatId || '',
         nickname: team.nickname || '',
         players: team.players,
         playersNew: team.playersNew,
@@ -252,9 +380,8 @@ export class TeamService {
         status: team.status.name,
         wish: team.wish || '',
         note: team.note || '',
-        isReservation: team.isReservation ? 'Так' : 'Ні',
-
-        createdAt: team.createdAt.toLocaleString('uk-UA'), // TODO
+        // isReservation: team.isReservation ? 'Так' : 'Ні',
+        createdAt: dataUtcToTimeZona(team.createdAt, team.city.tineZone.name)
       });
     });
 
@@ -276,13 +403,23 @@ export class TeamService {
       },
       include: {
         game: true,
-        city: true,
+        city: {
+          include: {
+            tineZone: true
+          }
+        },
         status: true
       },
     });
 
+    if (!res?.id) {
+      return {
+        data: null
+      }
+    }
+
     return {
-      data: res || null
+      data: { ...res, createdAt: dataUtcToTimeZona(res.createdAt, res.city.tineZone.name) }
     }
   }
 
@@ -301,7 +438,6 @@ export class TeamService {
       wish,
       note,
     } = updateTeamDto;
-
     const res = await this.prisma.team.update({
       where: {
         id
@@ -325,13 +461,111 @@ export class TeamService {
         } : undefined,
         wish,
         note
-      }
+      },
+      include: {
+        game: {
+          include: {
+            teams: {
+              where: {
+                statusId: 1,
+              },
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
+      },
     });
+
+    if (res.game.isPlaces && (res.game.statusId == 1 || res.game.statusId == 3)) {
+      let statusGame = 1;
+
+      if (res.game.places <= res.game.teams.length) {
+        statusGame = 3;
+      } else {
+        statusGame = 1;
+      }
+
+      await this.prisma.game.update({
+        where: {
+          id: res.game.id
+        },
+        data: {
+          statusId: statusGame
+        }
+      })
+    }
 
     return {
       data: {
         isUpdate: !!res?.id
       }
     }
+  }
+
+  async getTeamFilters(authorization: string) {
+    const spliteToken: string[] = authorization.split(" ");
+
+    const resUser = await this.prisma.auth.findUnique({
+      where: {
+        token: spliteToken[1],
+      },
+      include: {
+        user: {
+          include: {
+            city: true
+          }
+        }
+      }
+    });
+
+    const userModer = resUser.user.roleId == 1;
+
+    const where = {
+      ...(!userModer && {
+        cityId: {
+          in: resUser.user.city.map((el: { id: number }) => el.id),
+        },
+      })
+    }
+
+    const captainsRaw = await this.prisma.team.findMany({
+      where,
+      distinct: ['captain'],
+      select: { captain: true },
+    });
+
+    const phonesRaw = await this.prisma.team.findMany({
+      where,
+      distinct: ['phone'],
+      select: { phone: true },
+    });
+
+    const namesRaw = await this.prisma.team.findMany({
+      where,
+      distinct: ['name'],
+      select: { name: true },
+    });
+
+    const teamGames = await this.prisma.team.findMany({
+      where,
+      select: { gameId: true },
+      distinct: ['gameId'],
+    });
+
+    const gameIds = teamGames.map(t => t.gameId);
+
+    const gamesRaw = await this.prisma.game.findMany({
+      where: { id: { in: gameIds } },
+      select: { id: true, name: true },
+    });
+
+    return {
+      captains: captainsRaw.map((t) => t.captain),
+      phones: phonesRaw.map((t) => t.phone),
+      names: namesRaw.map((t) => t.name),
+      games: gamesRaw.map((t) => ({ id: t.id, name: t.name })),
+    };
   }
 }

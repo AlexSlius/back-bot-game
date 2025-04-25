@@ -5,10 +5,11 @@ model Status {
     name  String @unique
     color String
 
-    citys City[]
-    teams Team[]
-    user  User[]
-    games Game[]
+    citys    City[]
+    teams    Team[]
+    user     User[]
+    games    Game[]
+    questions Question[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt

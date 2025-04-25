@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Headers, Query } from '@nestjs/common';
 import { GameService } from './game.service';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
+import { toNumberArray } from 'src/common/helpers/array-h';
 
 @Controller()
 export class GameController {
@@ -14,22 +15,27 @@ export class GameController {
 
   @Get()
   findAll(
+    @Headers('authorization') authorization: string,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 20,
-    @Query('sities') sities: number[] = [],
-    @Query('statuses') statuses: number[] = [],
+    @Query('cities') sitiesRaw: string | string[],
+    @Query('statuses') statusesRaw: string | string[],
     @Query('search') search: string = '',
     @Query('dateFrom') dateFrom: Date = undefined,
     @Query('dateTo') dateTo: Date = undefined,
   ) {
+    const sities = toNumberArray(sitiesRaw);
+    const statuses = toNumberArray(statusesRaw);
+
     return this.gameService.findAll({
+      authorization,
       page: +page,
       limit: +limit,
       sities,
       statuses,
       search,
-      dateFrom,
-      dateTo,
+      dateFrom: dateFrom ? new Date(dateFrom) : undefined,
+      dateTo: dateTo ? new Date(dateTo) : undefined,
     });
   }
 

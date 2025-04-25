@@ -8,7 +8,7 @@ export class TimeZoneService {
 
   findAll(searchQuery?: string) {
     return this.prisma.timeZone.findMany({
-      take: 100,
+      take: 50,
       where: searchQuery ?
         {
           OR: [

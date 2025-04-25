@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
+import { dataUtcToTimeZona } from 'src/common/helpers/date-utc-to-timezona';
+import { fullImagePath } from 'src/common/helpers/file-path';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
-import { Prisma } from '@prisma/client';
+
 
 @Injectable()
 export class GameService {
@@ -46,6 +49,7 @@ export class GameService {
   }
 
   async findAll({
+    authorization,
     page,
     limit,
     sities,
@@ -54,6 +58,7 @@ export class GameService {
     dateFrom,
     dateTo,
   }: {
+    authorization: string;
     page: number;
     limit: number;
     sities: number[];
@@ -63,11 +68,41 @@ export class GameService {
     dateTo: Date
   }) {
     const skip = (page - 1) * limit;
+    const spliteToken: string[] = authorization.split(" ");
+
+    const resUser = await this.prisma.auth.findUnique({
+      where: {
+        token: spliteToken[1],
+      },
+      include: {
+        user: {
+          include: {
+            city: true
+          }
+        }
+      }
+    });
+
+    const userModer = resUser.user.roleId == 1;
+
+    let filterCity = [];
+
+    if (sities?.length) {
+      filterCity = sities;
+    } else {
+      if (userModer) {
+        filterCity = [];
+      }
+
+      if (!userModer) {
+        filterCity = resUser.user.city.map((el: { id: number }) => el.id);
+      }
+    }
 
     const where: Prisma.GameWhereInput = {
-      ...(sities?.length && {
+      ...(filterCity.length && {
         cityId: {
-          in: sities,
+          in: filterCity,
         },
       }),
       ...(statuses?.length && {
@@ -95,9 +130,19 @@ export class GameService {
         skip,
         take: limit,
         include: {
-          city: true,
+          city: {
+            include: {
+              tineZone: true
+            }
+          },
           status: true,
-          teams: true
+          teams: {
+            select: {
+              id: true,
+              name: true,
+              statusId: true,
+            },
+          },
         },
         orderBy: { id: 'desc' }
       }),
@@ -108,7 +153,7 @@ export class GameService {
     ]);
 
     return {
-      data: items,
+      data: items.map(el => ({ ...el, image: fullImagePath(el.image), beginningDateTime: dataUtcToTimeZona(el.beginningDateTime, el.city.tineZone.name) })),
       total,
       page,
       lastPage: Math.ceil(total / limit),
@@ -121,14 +166,28 @@ export class GameService {
         id,
       },
       include: {
-        city: true,
+        city: {
+          include: {
+            tineZone: true
+          }
+        },
         status: true,
         teams: true
       }
     })
 
+    if (!res?.id) {
+      return {
+        data: null
+      }
+    }
+
     return {
-      data: res?.id ? res : null
+      data: {
+        ...res,
+        image: fullImagePath(res.image),
+        beginningDateTime: dataUtcToTimeZona(res.beginningDateTime, res.city.tineZone.name)
+      }
     }
   }
 

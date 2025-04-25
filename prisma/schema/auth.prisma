@@ -4,7 +4,8 @@ model Auth {
     id    Int    @id @default(autoincrement())
     token String @unique
 
-    user User [] @relation("UserAuth")
+    userId Int
+    user   User @relation("UserAuth", fields: [userId], references: [id])
 
     reatedAt  DateTime @default(now())
     updatedAt DateTime @updatedAt

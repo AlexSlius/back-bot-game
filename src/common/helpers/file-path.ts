@@ -1,0 +1,1 @@
+export const fullImagePath = (nameFile: string) => nameFile ? `http://localhost:${process.env.PORT || 3000}/uploads/${nameFile}` : null;

@@ -19,8 +19,9 @@ export class CityController {
   findAll(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 20,
+    @Query('search') search: string = '',
   ) {
-    return this.cityService.findAll({ page: +page, limit: +limit });
+    return this.cityService.findAll({ page: +page, limit: +limit, search });
   }
 
   @Get(':id')

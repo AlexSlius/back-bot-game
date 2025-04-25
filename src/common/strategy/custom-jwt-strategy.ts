@@ -29,8 +29,8 @@ export class CustomJwtStrategy extends PassportStrategy(Strategy) {
             }
         });
 
-        if (!!record?.user[0]?.id) {
-            const { id, roleId, statusId } = record.user[0];
+        if (!!record?.user?.id) {
+            const { id, roleId, statusId } = record.user;
 
             if (statusId !== 1) {
                 throw new UnauthorizedException("Доступ заборонено");

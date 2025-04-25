@@ -6,7 +6,7 @@ export class TimeZoneController {
   constructor(private readonly timeZoneService: TimeZoneService) { }
 
   @Get()
-  findAll(@Query('searchQuery') searchQuery?: string) {
-    return this.timeZoneService.findAll(searchQuery);
+  findAll(@Query('search') search?: string) {
+    return this.timeZoneService.findAll(search);
   }
 }

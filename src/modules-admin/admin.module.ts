@@ -13,6 +13,7 @@ import { GameModule } from './game/game.module';
 import { CityModule } from './city/city.module';
 import { AuthModule } from './auth/auth.module';
 import { TeamModule } from './team/team.module';
+import { UploadModule } from './upload/upload.module';
 
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { CustomJwtStrategy } from 'src/common/strategy/custom-jwt-strategy';
@@ -36,6 +37,7 @@ import { AdminController } from './admin.controller';
         GameModule,
         CityModule,
         TeamModule,
+        UploadModule,
         RouterModule.register([
             {
                 path: 'admin',
@@ -76,6 +78,10 @@ import { AdminController } from './admin.controller';
                         path: 'cities',
                         module: CityModule,
                     },
+                    {
+                        path: 'uploads',
+                        module: UploadModule
+                    }
                 ],
             },
         ]),

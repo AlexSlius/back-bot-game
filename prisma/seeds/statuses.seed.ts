@@ -15,21 +15,50 @@ export async function seedStatuses() {
     await prisma.status.createMany({
         data: [
             {
+                id: 1,
                 name: "Активний",
                 color: "green"
             },
             {
+                id: 2,
                 name: "Неактивний",
                 color: "red"
             },
             {
+                id: 3,
                 name: "Резерв",
                 color: "orange"
             },
             {
+                id: 4,
                 name: "Чернетка",
                 color: "blue"
-            }
+            },
+            {
+                id: 5,
+                name: "Скасовано",
+                color: "red"
+            },
+            {
+                id: 6,
+                name: "Заяка",
+                color: "blue"
+            },
+            {
+                id: 7,
+                name: "Завершено",
+                color: "grey"
+            },
+            {
+                id: 8,
+                name: "Архів",
+                color: "Orange"
+            },
+            {
+                id: 9,
+                name: "Нова",
+                color: "green"
+            },
         ]
     });
 
