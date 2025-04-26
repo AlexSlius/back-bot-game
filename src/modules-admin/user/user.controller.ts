@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, UseGuards, Headers, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { RoleModeratorGuard } from 'src/common/guards/role-moderator';
+import { Public } from 'src/common/decorators/public.decorator';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -30,9 +31,15 @@ export class UserController {
     return this.userService.findCurrent(authorization);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  @Public()
+  @Patch('forgot-password')
+  forgotPassword(@Body() dataEmail: { email: string }) {
+    return this.forgotPassword(dataEmail);
+  }
+
+  @Patch('update-password/:id')
+  updatePassword(@Headers('authorization') authorization: string, @Param('id') id: string, @Body() data: UpdatePasswordDto) {
+    return this.userService.updatePassword(authorization, +id, data);
   }
 
   @UseGuards(RoleModeratorGuard)
@@ -41,8 +48,8 @@ export class UserController {
     return this.userService.update(authorization, +id, updateUserDto);
   }
 
-  @Patch('update-password/:id')
-  updatePassword(@Headers('authorization') authorization: string, @Param('id') id: string, @Body() data: UpdatePasswordDto) {
-    return this.userService.updatePassword(authorization, +id, data);
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.userService.findOne(+id);
   }
 }

@@ -27,6 +27,13 @@ export class QuestionController {
     });
   }
 
+  @Get('total-active')
+  tatalActive(
+    @Headers('authorization') authorization: string
+  ) {
+    return this.questionService.totalActive(authorization);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateQuestionDto: UpdateQuestionDto) {
     return this.questionService.update(+id, updateQuestionDto);

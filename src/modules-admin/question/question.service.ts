@@ -132,6 +132,50 @@ export class QuestionService {
     }
   }
 
+  async totalActive(authorization: string) {
+    const spliteToken: string[] = authorization.split(" ");
+
+    const resUser = await this.prisma.auth.findUnique({
+      where: {
+        token: spliteToken[1],
+      },
+      include: {
+        user: {
+          include: {
+            city: true
+          }
+        }
+      }
+    });
+
+    const userModer = resUser.user.roleId == 1;
+
+    let filterCity = [];
+
+    if (!userModer) {
+      filterCity = resUser.user.city.map((el: { id: number }) => el.id);
+    }
+
+    const where = {
+      ...(filterCity?.length && {
+        cityId: {
+          in: filterCity,
+        },
+      }),
+      statusId: 9,
+    };
+
+    const questioLength = await this.prisma.question.count({
+      where
+    })
+
+    return {
+      data: {
+        questioLength
+      }
+    }
+  }
+
   async update(id: number, updateQuestionDto: UpdateQuestionDto) {
     const {
       chatId,
