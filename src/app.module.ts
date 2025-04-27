@@ -20,7 +20,7 @@ import { GameStatusCheckerService } from './tasks/game-status-checker.service';
       rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads',
     }),
-    ScheduleModule.forRoot()
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [

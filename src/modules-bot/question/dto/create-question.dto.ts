@@ -25,7 +25,4 @@ export class CreateQuestionDto {
 
     @IsString()
     answer: string
-
-    @IsNumber()
-    statusId: number
 }

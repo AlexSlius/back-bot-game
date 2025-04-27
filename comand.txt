@@ -4,3 +4,7 @@ npx prisma generate
 npx prisma db seed
 
 npx prisma studio - перевірка міграцій
+
+nest g service user
+nest g controller product
+nest g resource order
