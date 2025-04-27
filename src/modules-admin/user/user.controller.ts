@@ -32,7 +32,7 @@ export class UserController {
   }
 
   @Public()
-  @Patch('forgot-password')
+  @Post('forgot-password')
   forgotPassword(@Body() dataEmail: { email: string }) {
     return this.forgotPassword(dataEmail);
   }

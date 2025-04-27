@@ -87,7 +87,7 @@ export class TeamController {
   }
 
   @Get('filters')
-  getFilters(@Headers('authorization') authorization: string,) {
+  getFilters(@Headers('authorization') authorization: string) {
     return this.teamService.getTeamFilters(authorization);
   }
 
