@@ -1,14 +1,14 @@
 FROM node:22-alpine AS builder
-WORKDIR /app
+WORKDIR /backend
 COPY . .
 RUN yarn install
 RUN yarn build
 
 FROM node:22-alpine
-WORKDIR /app
+WORKDIR /backend
 
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /backend/dist ./dist
+COPY --from=builder /backend/node_modules ./node_modules
+COPY --from=builder /backend/package.json ./package.json
 
 CMD ["yarn", "start"]
