@@ -6,6 +6,10 @@ export class AuthBotGuard implements CanActivate {
         const request = context.switchToHttp().getRequest<Request>();
         const apiKey = request.headers['x-api-key'];
 
+        if (!request.url.startsWith('/api/bot')) {
+            return true;
+        }
+
         if (apiKey && apiKey === process.env.API_KEY) {
             return true;
         }

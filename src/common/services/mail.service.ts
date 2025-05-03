@@ -24,7 +24,7 @@ export class SendEmail {
         return `
         <div style="font-family: Arial, sans-serif; padding: 20px;">
             <h2 style="color: #3858e9;">${isNew ? "Вітаємо у нашій системі!" : "Підтримка СРМ МГ"}</h2>
-            <p>${isNew ? "Дякуємо за реєстрацію." : "Новий пароль"}</p>
+            <p>${isNew ? "Дякуємо за реєстрацію." : ""}</p>
             <p><strong>Ваш ${isNew ? "" : "новий"} пароль для входу:</strong></p>
             <div style="background-color: #f0f0f0; padding: 10px; border-radius: 5px; display: inline-block;">
                 <strong>${password}</strong>

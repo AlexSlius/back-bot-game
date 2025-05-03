@@ -303,6 +303,8 @@ export class UserService {
       }
     }
 
+    console.log("email: ", email);
+
     const res = await this.prisma.user.findUnique({
       where: {
         email

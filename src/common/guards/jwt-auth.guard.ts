@@ -12,6 +12,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     canActivate(context: ExecutionContext) {
+        const request = context.switchToHttp().getRequest<Request>();
+
+        if (request.url.startsWith('/api/bot/')) {
+            return true;
+        }
+
         const isPublic = this.reflector.getAllAndOverride<boolean>(
             IS_PUBLIC_KEY,
             [

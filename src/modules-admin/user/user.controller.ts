@@ -8,6 +8,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Controller()
+@UseGuards()
 export class UserController {
   constructor(private readonly userService: UserService) { }
 
@@ -34,7 +35,7 @@ export class UserController {
   @Public()
   @Post('forgot-password')
   forgotPassword(@Body() dataEmail: { email: string }) {
-    return this.forgotPassword(dataEmail);
+    return this.userService.forgotPassword(dataEmail?.email || "");
   }
 
   @Patch('update-password/:id')

@@ -119,44 +119,64 @@ export class TeamService {
     });
   }
 
-  async update(id: number, updateTeamDto: UpdateTeamDto) {
+  findFirst(gameId: number, chatId: string) {
+    return this.prisma.team.findFirst({
+      where: {
+        gameId: gameId,
+        chatId
+      },
+      select: {
+        id: true
+      }
+    });
+  }
+
+  async findLastTeam(chatId: string) {
+    const team = await this.prisma.team.findFirst({
+      where: {
+        chatId: chatId,
+        name: {
+          notIn: ['', '-'],
+        },
+        captain: {
+          notIn: ['', '-'],
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return team;
+  }
+
+  async update(updateTeamDto: UpdateTeamDto) {
     const {
-      name,
-      captain,
-      phone,
-      chatId,
-      nickname,
-      gameId,
-      cityId,
-      players,
       playersNew,
+      chatId,
+      gameId,
       statusId,
-      wish,
-      note,
     } = updateTeamDto;
+
+    const getTeamCurrent = await this.prisma.team.findFirst({
+      where: {
+        gameId,
+        chatId
+      },
+      select: {
+        id: true
+      }
+    });
+
     const res = await this.prisma.team.update({
       where: {
-        id
+        id: getTeamCurrent.id
       },
       data: {
-        name,
-        captain,
-        phone,
-        chatId,
-        nickname,
-        game: gameId ? {
-          connect: { id: gameId }
-        } : undefined,
-        city: cityId ? {
-          connect: { id: cityId }
-        } : undefined,
-        players,
-        playersNew,
+        playersNew: playersNew ? playersNew : undefined,
         status: statusId ? {
           connect: { id: statusId }
         } : undefined,
-        wish,
-        note
       },
       include: {
         game: {

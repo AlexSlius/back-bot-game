@@ -18,6 +18,10 @@ export class CustomJwtStrategy extends PassportStrategy(Strategy) {
     }
 
     async validate(req: Request, payload: any) {
+        if (!req.url.startsWith('/api/admin')) {
+            return true;
+        }
+
         const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
 
         const record = await this.prisma.auth.findUnique({

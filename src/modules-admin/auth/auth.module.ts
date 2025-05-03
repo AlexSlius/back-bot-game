@@ -7,4 +7,5 @@ import { PasswordServis } from 'src/common/services/password.services';
   controllers: [AuthController],
   providers: [AuthService, PasswordServis],
 })
+
 export class AuthModule { }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Query } from '@nestjs/common';
 
 import { TeamService } from './team.service';
 import { CreateTeamDto } from './dto/create-team.dto';
@@ -13,13 +13,26 @@ export class TeamController {
     return this.teamService.create(createTeamDto);
   }
 
+  @Get('register')
+  findFirst(
+    @Query('gameId') gameId: string,
+    @Query('chatId') chatId: string,
+  ) {
+    return this.teamService.findFirst(+gameId, chatId);
+  }
+
+  @Get('last')
+  findLastTeam(@Query('chatId') chatId: string) {
+    return this.teamService.findLastTeam(chatId);
+  }
+
   @Get(':id')
-  findOne(@Param('id') id: string, @Param('gameId') gameId: string) {
+  findOne(@Param('id') id: string, @Query('gameId') gameId: string) {
     return this.teamService.findOne(+id, +gameId);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTeamDto: UpdateTeamDto) {
-    return this.teamService.update(+id, updateTeamDto);
+  @Patch('update')
+  update(@Body() updateTeamDto: UpdateTeamDto) {
+    return this.teamService.update(updateTeamDto);
   }
 }
