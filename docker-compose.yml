@@ -2,8 +2,8 @@ services:
   backend:
     build: .
     container_name: backend
-    ports:
-      - "3004:3004"
+    #ports:
+    #  - "3004:3004"
     depends_on:
       - postgres
     env_file:
