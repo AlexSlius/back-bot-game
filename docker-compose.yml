@@ -12,7 +12,7 @@ services:
       - .:/app
       - /app/node_modules
     networks:
-        nginx:
+      nginx:
     
 
   postgres:
