@@ -1,16 +1,19 @@
-FROM node:22-alpine
+FROM node:22-alpine AS build
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-RUN npm install
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
 
 COPY . .
+RUN yarn build
 
-RUN npx prisma generate
+FROM nginx:alpine
 
-RUN npm run build
+COPY --from=build /app/build /usr/share/nginx/html
 
-EXPOSE 3000
+COPY ../nginx/default.conf /etc/nginx/conf.d/default.conf
 
-CMD ["npm", "run", "start:prod"]
+EXPOSE 3004
+
+CMD ["yarn", "start", "start:prod"]
