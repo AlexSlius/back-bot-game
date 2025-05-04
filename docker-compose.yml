@@ -38,6 +38,7 @@ services:
 volumes:
   pgdata:
 
+
 networks:
   nginx:
     name: nginx_default

@@ -19,6 +19,9 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
+  "resolutions": {
+    "node-base64": "npm:js-base64"
+  },
   "prisma": {
     "seed": "ts-node prisma/seed.ts",
     "schema": "./prisma/schema"
@@ -43,7 +46,7 @@
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "exceljs": "^4.4.0",
-    "jwt": "^0.2.0",
+    "jsonwebtoken": "^9.0.2",
     "luxon": "^3.6.1",
     "multer": "^1.4.5-lts.2",
     "nodemailer": "^6.10.1",
