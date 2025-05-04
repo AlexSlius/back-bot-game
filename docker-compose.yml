@@ -27,6 +27,8 @@ services:
       POSTGRES_DB: crm
     volumes:
       - pgdata:/var/lib/postgresql/data
+  networks:
+      nginx:
 
 volumes:
   pgdata:
