@@ -7,6 +7,8 @@ WORKDIR /app
 COPY package.json yarn.lock ./
 RUN yarn install --immutable --immutable-cache
 
+COPY prisma/schema ./prisma/schema
+
 RUN npx prisma generate
 
 COPY . .
