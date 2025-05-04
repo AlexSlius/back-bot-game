@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    container_name: backend
+    ports:
+      - "3004:3004"
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres-container
+    restart: always
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: dbAdmin
+      POSTGRES_PASSWORD: dbPass_27
+      POSTGRES_DB: crm
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin-container
+    restart: always
+    ports:
+      - "5050:5050"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+
+networks:
+  nginx:
+    name: nginx_default
+    external: true
