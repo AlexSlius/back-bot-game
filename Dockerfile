@@ -2,7 +2,7 @@ FROM node:22-alpine
 
 RUN corepack enable && corepack prepare yarn@stable --activate
 
-WORKDIR /app
+WORKDIR /backend
 
 COPY package.json yarn.lock ./
 RUN yarn install --immutable --immutable-cache
