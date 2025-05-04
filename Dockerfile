@@ -1,5 +1,7 @@
 FROM node:22-alpine AS build
 
+RUN corepack enable && corepack prepare yarn@stable --activate
+
 WORKDIR /app
 
 COPY package.json yarn.lock ./
