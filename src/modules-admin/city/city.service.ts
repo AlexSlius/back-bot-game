@@ -36,7 +36,7 @@ export class CityService {
       ...(search && {
         name: {
           contains: search,
-          mode: Prisma.QueryMode.insensitive,
+          mode: 'insensitive' as const,
         },
       }),
     }
