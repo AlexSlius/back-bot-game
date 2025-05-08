@@ -10,7 +10,13 @@ async function bootstrap() {
   app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://85.217.170.47', 'https://85.217.170.47'],
+    origin: [
+      'http://localhost:3000',
+      'http://85.217.170.47',
+      'https://85.217.170.47',
+      "http://crm.mindgame.ua",
+      "https://crm.mindgame.ua"
+    ],
     credentials: true,
   });
 
