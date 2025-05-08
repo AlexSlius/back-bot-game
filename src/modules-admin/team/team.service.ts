@@ -347,11 +347,9 @@ export class TeamService {
 
     // Columns
     worksheet.columns = [
-      { header: 'ID', key: 'id', width: 8 },
       { header: 'Назва команди', key: 'name', width: 25 },
       { header: 'Капітан', key: 'captain', width: 20 },
       { header: 'Телефон', key: 'phone', width: 18 },
-      { header: 'Chat ID', key: 'chatId', width: 18 },
       { header: 'Нікнейм', key: 'nickname', width: 18 },
       { header: 'Гравці', key: 'players', width: 10 },
       { header: 'Новачки', key: 'playersNew', width: 10 },
@@ -360,18 +358,15 @@ export class TeamService {
       { header: 'Статус', key: 'status', width: 15 },
       { header: 'Бажання', key: 'wish', width: 30 },
       { header: 'Примітка', key: 'note', width: 30 },
-      { header: 'Резерв?', key: 'isReservation', width: 10 },
       { header: 'Дата створення', key: 'createdAt', width: 20 },
     ];
 
     // Data
     resTeams.forEach(team => {
       worksheet.addRow({
-        // id: team.id,
         name: team.name,
         captain: team.captain,
         phone: team.phone,
-        // chatId: team.chatId || '',
         nickname: team.nickname || '',
         players: team.players,
         playersNew: team.playersNew,
@@ -380,7 +375,6 @@ export class TeamService {
         status: team.status.name,
         wish: team.wish || '',
         note: team.note || '',
-        // isReservation: team.isReservation ? 'Так' : 'Ні',
         createdAt: dataUtcToTimeZona(team.createdAt, team.city.tineZone.name)
       });
     });
