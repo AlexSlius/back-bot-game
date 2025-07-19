@@ -112,12 +112,22 @@ export class QuestionService {
 
       this.prisma.question.count({
         where: {
+          ...(filterCity?.length && {
+            cityId: {
+              in: filterCity,
+            },
+          }),
           statusId: 9
         },
       }),
 
       this.prisma.question.count({
         where: {
+          ...(filterCity?.length && {
+            cityId: {
+              in: filterCity,
+            },
+          }),
           statusId: 8
         },
       }),
