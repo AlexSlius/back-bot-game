@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsBoolean } from 'class-validator';
 
 export class CreateQuestionDto {
     @IsString()
@@ -28,4 +28,8 @@ export class CreateQuestionDto {
 
     @IsNumber()
     statusId: number
+
+    @IsOptional()
+    @IsBoolean()
+    isAnswer: boolean
 }

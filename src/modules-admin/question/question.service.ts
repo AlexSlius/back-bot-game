@@ -1,14 +1,20 @@
 import { Injectable } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 
 import { PrismaService } from 'prisma/prisma.service';
 import { dataUtcToTimeZona } from 'src/common/helpers/date-utc-to-timezona';
+
 
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 
 @Injectable()
 export class QuestionService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly http: HttpService
+  ) { }
 
   async create(createQuestionDto: CreateQuestionDto) {
     const {
@@ -196,7 +202,8 @@ export class QuestionService {
       team,
       question,
       answer,
-      statusId
+      statusId,
+      isAnswer = false
     } = updateQuestionDto;
 
     const data: any = {
@@ -219,14 +226,43 @@ export class QuestionService {
       })
     };
 
+    let message = '';
+
     const res = await this.prisma.question.update({
       where: { id },
       data
     });
 
+    if (!res?.id) {
+      message = 'Не вдалось оновити';
+    }
+
+    if (isAnswer) {
+      if (!!res?.id && !!res?.messageId) {
+        const { data } = await firstValueFrom(
+          this.http.post(
+            `${process.env.API_DOMAIN_BOT}/send-message`,
+            {
+              chatId: res.chatId,
+              text: answer,
+              replyToMessageId: res.messageId
+            },
+            {
+              headers: {
+                "x-api-key": process.env.API_KEY
+              },
+            }
+          )
+        );
+      } else {
+        message = 'Не вдалось відправити повідомлення в чат'
+      }
+    }
+
     return {
       data: {
-        isAdd: !!res?.id
+        isAdd: !!res?.id,
+        message,
       }
     };
   }

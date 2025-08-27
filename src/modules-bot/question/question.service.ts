@@ -10,6 +10,7 @@ export class QuestionService {
   async create(createQuestionDto: CreateQuestionDto) {
     const {
       chatId,
+      messageId,
       nickname,
       name,
       phone,
@@ -22,6 +23,7 @@ export class QuestionService {
     const res = await this.prisma.question.create({
       data: {
         chatId,
+        messageId,
         nickname,
         name,
         phone,

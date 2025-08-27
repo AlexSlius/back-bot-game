@@ -4,6 +4,9 @@ export class CreateQuestionDto {
     @IsString()
     chatId: string
 
+    @IsString()
+    messageId: string
+
     @IsOptional()
     @IsString()
     nickname?: string
