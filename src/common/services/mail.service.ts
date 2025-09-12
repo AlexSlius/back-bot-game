@@ -36,4 +36,22 @@ export class SendEmail {
             </div>
         `
     }
+
+    async sendBotQuestionNotice(email: string, name: string, question: string) {
+        await transporter.sendMail({
+            from: `"CRM MG" <${process.env.MAIN_FORM}>`,
+            to: email,
+            subject: 'Новий запит із бота',
+            html: `
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2 style="color: #3858e9;">Новий запит із бота</h2>
+                    <p><strong>Ім'я:</strong> ${name}</p>
+                    <p><strong>Питання:</strong> ${question}</p>
+                    <p>Перегляньте його у <a href="https://crm.mindgame.ua/question-answer">CRM</a>.</p>
+                    <br/>
+                    <p>Команда підтримки</p>
+                </div>
+            `
+        });
+    }
 }

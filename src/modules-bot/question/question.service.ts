@@ -1,11 +1,16 @@
 import { Injectable } from '@nestjs/common';
 
 import { PrismaService } from 'prisma/prisma.service';
+import { SendEmail } from 'src/common/services/mail.service';
+
 import { CreateQuestionDto } from './dto/create-question.dto';
 
 @Injectable()
 export class QuestionService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly sendEmail: SendEmail,
+  ) { }
 
   async create(createQuestionDto: CreateQuestionDto) {
     const {
@@ -38,6 +43,20 @@ export class QuestionService {
         }
       }
     });
+
+    const resUsers = await this.prisma.user.findMany({
+      where: {
+        city: {
+          some: {
+            id: cityId
+          }
+        }
+      }
+    });
+
+    for (const user of resUsers) {
+      await this.sendEmail.sendBotQuestionNotice(user.email, name, question);
+    }
 
     return {
       data: {
