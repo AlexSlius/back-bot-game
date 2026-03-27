@@ -163,7 +163,8 @@ export class TeamService {
     const getTeamCurrent = await this.prisma.team.findFirst({
       where: {
         gameId,
-        chatId
+        chatId,
+        statusId: 1
       },
       select: {
         id: true
