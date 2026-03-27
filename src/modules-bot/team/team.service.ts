@@ -123,10 +123,12 @@ export class TeamService {
     return this.prisma.team.findFirst({
       where: {
         gameId: gameId,
-        chatId
+        chatId,
+        statusId: 1
       },
       select: {
-        id: true
+        id: true,
+        statusId: true,
       }
     });
   }
