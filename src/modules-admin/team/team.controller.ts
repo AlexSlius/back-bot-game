@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Headers, Res, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Headers, Res, Query, Delete } from '@nestjs/common';
 import { Response } from 'express';
 import { toNumberArray, toStringArray } from 'src/common/helpers/array-h';
 
@@ -99,5 +99,10 @@ export class TeamController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateTeamDto: UpdateTeamDto) {
     return this.teamService.update(+id, updateTeamDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.teamService.remove(+id);
   }
 }

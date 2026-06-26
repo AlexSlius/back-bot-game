@@ -498,6 +498,68 @@ export class TeamService {
     }
   }
 
+  async remove(id: number) {
+    const team = await this.prisma.team.findUnique({
+      where: {
+        id
+      },
+      select: {
+        gameId: true,
+      },
+    });
+
+    if (!team) {
+      return {
+        data: {
+          isDelete: false
+        }
+      }
+    }
+
+    await this.prisma.team.delete({
+      where: {
+        id
+      },
+    });
+
+    const game = await this.prisma.game.findUnique({
+      where: {
+        id: team.gameId
+      },
+      include: {
+        teams: {
+          where: {
+            statusId: 1,
+          },
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    if (game?.isPlaces && (game.statusId == 1 || game.statusId == 3)) {
+      const statusGame = game.places <= game.teams.length ? 3 : 1;
+
+      if (game.statusId != statusGame) {
+        await this.prisma.game.update({
+          where: {
+            id: game.id
+          },
+          data: {
+            statusId: statusGame
+          }
+        })
+      }
+    }
+
+    return {
+      data: {
+        isDelete: true
+      }
+    }
+  }
+
   async getTeamFilters(authorization: string) {
     const spliteToken: string[] = authorization.split(" ");
 
